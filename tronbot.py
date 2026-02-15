@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
 Telegram Bot - TronPanel + TRX Bot
-Sadece Panel 2, Railway uyumlu
+Sadece Panel 2, güncellenmiş sitelerle ve Railway uyumlu
 """
 
-import os
 import ssl
 import asyncio
 from datetime import datetime, timedelta
@@ -12,16 +11,17 @@ import aiohttp
 from bs4 import BeautifulSoup
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+import os
 
-# ==================== ENV DEĞİŞKENLERİ ====================
+# ==================== ENV / SABİT DEĞERLER ====================
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 PANEL2_USERNAME = os.getenv("TRONPANEL_USER")
 PANEL2_PASSWORD = os.getenv("TRONPANEL_PASS")
 
-if not BOT_TOKEN or not PANEL2_USERNAME or not PANEL2_PASSWORD:
-    raise RuntimeError("Railway environment variables eksik! BOT_TOKEN, TRONPANEL_USER ve TRONPANEL_PASS ekleyin.")
-
 PANEL2_URL = "https://win.tronpanel.com"
+
+if not BOT_TOKEN or not PANEL2_USERNAME or not PANEL2_PASSWORD:
+    raise RuntimeError("Railway environment variables eksik! BOT_TOKEN, TRONPANEL_USER, TRONPANEL_PASS ekleyin.")
 
 # ==================== PANEL SITE ID'LERI ====================
 PANEL2_SITES = {
@@ -118,7 +118,6 @@ async def veri(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(f"Hata: {e}")
         await msg.edit_text("❌ Veriler alınırken hata oluştu")
 
-# ==================== /abi KOMUTU ====================
 async def abi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👑 @atmkrnca 👑")
 
