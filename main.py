@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
 Telegram Bot - TronPanel + TRX Bot
-Railway uyumlu, tek parça, webhook tabanlı
+Sadece Panel 2, güncellenmiş sitelerle ve Railway uyumlu
 """
 
-import os
 import ssl
 import asyncio
 from datetime import datetime, timedelta
@@ -12,14 +11,19 @@ import aiohttp
 from bs4 import BeautifulSoup
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+import os
 
-# ==================== SABİT DEĞERLER ====================
-BOT_TOKEN = os.getenv("BOT_TOKEN") or "BOT_TOKEN_BURAYA"
-PANEL2_USERNAME = os.getenv("TRONPANEL_USER") or "KULLANICI_ADI_BURAYA"
-PANEL2_PASSWORD = os.getenv("TRONPANEL_PASS") or "SIFRE_BURAYA"
+# ==================== ENV / SABİT DEĞERLER ====================
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+PANEL2_USERNAME = os.getenv("TRONPANEL_USER")
+PANEL2_PASSWORD = os.getenv("TRONPANEL_PASS")
+
 PANEL2_URL = "https://win.tronpanel.com"
 
-# ==================== PANEL SITE ID'LERİ ====================
+if not BOT_TOKEN or not PANEL2_USERNAME or not PANEL2_PASSWORD:
+    raise RuntimeError("Railway environment variables eksik! BOT_TOKEN, TRONPANEL_USER, TRONPANEL_PASS ekleyin.")
+
+# ==================== PANEL SITE ID'LERI ====================
 PANEL2_SITES = {
     "izmir": {"id": "9c69c72a-5f88-4130-bf9b-cef6755ffb78", "name": "İzmir(B)"},
     "adana": {"id": "b724ae8c-bd4b-4147-acb6-dfb72656c5d5", "name": "Adana(W)"},
@@ -42,7 +46,7 @@ def format_number(value):
     except:
         return f"{value} TL"
 
-# ==================== PANEL VERİ ÇEKME ====================
+# ==================== PANEL VERI CEKME ====================
 async def fetch_site_data(session, reports_url, api_csrf, site_info, today):
     try:
         async with session.post(
@@ -63,13 +67,13 @@ async def fetch_site_data(session, reports_url, api_csrf, site_info, today):
         print(f"Site verisi çekilemedi ({site_info['name']}): {e}")
         return site_info["name"], {"yat":0,"yat_adet":0,"cek":0,"cek_adet":0}
 
-async def fetch_panel_data(panel_url, username, password, sites):
+async def fetch_panel_data(panel_url, username, password, sites, use_plural=False):
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 
     login_url = f"{panel_url}/login"
-    reports_url = f"{panel_url}/report/quickly"
+    reports_url = f"{panel_url}/{'reports' if use_plural else 'report'}/quickly"
 
     connector = aiohttp.TCPConnector(ssl=ssl_context)
     async with aiohttp.ClientSession(connector=connector) as session:
@@ -89,14 +93,14 @@ async def fetch_panel_data(panel_url, username, password, sites):
 
 async def fetch_all_data():
     try:
-        panel2_data = await fetch_panel_data(PANEL2_URL, PANEL2_USERNAME, PANEL2_PASSWORD, PANEL2_SITES)
+        panel2_data = await fetch_panel_data(PANEL2_URL, PANEL2_USERNAME, PANEL2_PASSWORD, PANEL2_SITES, False)
     except Exception as e:
         print(f"Panel veri çekme hatası: {e}")
         panel2_data = {}
     today = (datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d")
     return today, panel2_data
 
-# ==================== TELEGRAM KOMUTLARI ====================
+# ==================== TELEGRAM HANDLER ====================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🎰 TronPanel Veri Bot\n\n/veri - Günlük TL verileri\n/abi - Özel mesaj"
@@ -119,22 +123,12 @@ async def abi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ==================== MAIN ====================
 def main():
-    import os
-    from telegram.ext import ApplicationBuilder
-
-    PORT = int(os.environ.get("PORT", "8443"))
-
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    print("🤖 TronPanel Veri Bot başlatılıyor...")
+    app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("veri", veri))
     app.add_handler(CommandHandler("abi", abi))
-
-    # Railway uyumlu webhook
-    app.run_webhook(
-        listen="0.0.0.0",
-        port=PORT,
-        webhook_url=f"https://{os.environ.get('RAILWAY_STATIC_URL')}/{BOT_TOKEN}"
-    )
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
