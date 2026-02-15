@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 Telegram Bot - TronPanel + TRX Bot
-Sadece Panel 2, güncellenmiş sitelerle
-Railway uyumlu (env variable ile)
+Sadece Panel 2, Railway uyumlu
 """
 
 import os
@@ -15,7 +14,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # ==================== ENV DEĞİŞKENLERİ ====================
-BOT_TOKEN = os.getenv("BOT_TOKEN")  # Railway Variables
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 PANEL2_USERNAME = os.getenv("TRONPANEL_USER")
 PANEL2_PASSWORD = os.getenv("TRONPANEL_PASS")
 
