@@ -34,6 +34,7 @@ PANEL2_SITES = {
     "bayconticasino": {"id": "0e9ac775-120b-45c1-bd60-90d2e4a0f23c", "name": "BayContiCasino"},
     "maximcasino": {"id": "759fe569-589b-4c28-acf5-2862f4ea5351", "name": "MaximCasino"},
     "rinabet": {"id": "ec567fc7-972f-48d5-b505-c4c7db2a5606", "name": "Rinabet"},
+     "Denver": {"id": "dadac705-842f-4317-8564-8d169fed4f0f", "name": "Denver"},
 }
 
 # ==================== TL FORMAT ====================
@@ -132,3 +133,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
